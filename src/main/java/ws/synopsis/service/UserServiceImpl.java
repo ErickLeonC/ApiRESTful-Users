@@ -1,51 +1,53 @@
 package ws.synopsis.service;
 
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import ws.synopsis.model.User;
 import ws.synopsis.repository.IUserRepository;
-@Service
+
+@Service("UserServiceImpl")
 public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private IUserRepository repository;
 
-	@Override
-	public User add(User user) {
-		long idUser = ThreadLocalRandom.current().nextLong(1,223372036);
-		user.setId(idUser);
+	@Qualifier("userRepository")
+	public User addUser(User user) {
 		return repository.save(user);
 	}
 
 	@Override
 	public User update(User user) {
-		User usr = repository.getOne(user.getId());
+		User usr = repository.findById(user.getId());
 		if (usr != null) {
 			return repository.save(user);
+		} else {
+			return null;
 		}
-		return null;
-	}
-
-	@Override
-	public boolean delete(long id) {
-		repository.deleteById(id);
-		return true;
-	}
-
-	@Override
-	public User get(long id) {
-		return repository.getOne(id);
 	}
 
 	@Override
 	public List<User> list() {
-		return repository.findAll();
+		List<User> list = repository.findAll();
+		return list;
 	}
 
+	@Override
+	public User getById(int id) {
+		return repository.findById(id);
+	}
 
+	@Override
+	public String delete(int id) {
+		User user = repository.findById(id);
+		if (user != null) {
+			repository.delete(user);
+			return "Delete successful";
+		} else
+			return "Missing Id";
+	}
 
 }
